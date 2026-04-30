@@ -1,0 +1,5 @@
+{
+  "name": "Sistema de Pagamentos - Integração WhatsApp",
+  "description": "Sistema para upload de planilhas de pagamentos e envio de notificações via WhatsApp.",
+  "requestFramePermissions": []
+}

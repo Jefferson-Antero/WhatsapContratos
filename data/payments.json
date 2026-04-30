@@ -1,0 +1,106 @@
+[
+  {
+    "recordId": "row-1",
+    "recordData": {
+      "id": "row-1",
+      "contratoObjeto": "083/CPL/2020 - JUNTA MILITAR - LOCAÇÃO IMÓVEL",
+      "processo": "2026/014064",
+      "periodoValor": "11/01 a 10/02/2026 - R$ 3.322,16",
+      "setorData": "DESPESA - 30/03/2026"
+    },
+    "phoneNumber": "21981682922",
+    "sentAt": "2026-04-30T12:55:42.268Z",
+    "createdAt": "2026-04-30T12:55:42.332Z"
+  },
+  {
+    "recordId": "row-5",
+    "recordData": {
+      "id": "row-5",
+      "contratoObjeto": "070-B/CPL/2024 - LUIZ COTRIK - LOCAÇÃO IMÓVEL",
+      "processo": "2026/008372",
+      "periodoValor": "02/01 a 01/02/2026 - R$ 20.675,00",
+      "setorData": "TESOURARIA - 22/04/2026"
+    },
+    "phoneNumber": "21981682922",
+    "sentAt": "2026-04-30T12:56:03.428Z",
+    "createdAt": "2026-04-30T12:56:03.737Z"
+  },
+  {
+    "recordId": "row-10",
+    "recordData": {
+      "id": "row-10",
+      "contratoObjeto": "016-A/CPL/2025 - SUN ENERGY - LOCAÇÃO VEÍCULOS",
+      "processo": "2026/015561",
+      "periodoValor": "01/02 a 28/02/2026 - R$ 63.145,00",
+      "setorData": "DESPESA - 20/04/2026"
+    },
+    "phoneNumber": "21981682922",
+    "sentAt": "2026-04-30T12:56:03.740Z",
+    "createdAt": "2026-04-30T12:56:04.061Z"
+  },
+  {
+    "recordId": "row-15",
+    "recordData": {
+      "id": "row-15",
+      "contratoObjeto": "016-D/CPL/2025 - EGEL - LOCAÇÃO VEÍCULOS",
+      "processo": "2026/016107",
+      "periodoValor": "01/02 a 28/02/2026 - R$ 9.400,00",
+      "setorData": "DESPESA - 14/04/2026"
+    },
+    "phoneNumber": "21981682922",
+    "sentAt": "2026-04-30T12:56:15.151Z",
+    "createdAt": "2026-04-30T12:56:15.156Z"
+  },
+  {
+    "recordId": "row-19",
+    "recordData": {
+      "id": "row-19",
+      "contratoObjeto": "011/CPL/2022 - INTELIGÊNCIA ARTIFICIAL - LOCAÇÃO AR CONDICIONADO",
+      "processo": "2026/016331",
+      "periodoValor": "01/02 a 28/02/2026 - R$ 2.259,00",
+      "setorData": "TESOURARIA - 20/04/2026"
+    },
+    "phoneNumber": "21981682922",
+    "sentAt": "2026-04-30T12:56:15.183Z",
+    "createdAt": "2026-04-30T12:56:15.186Z"
+  },
+  {
+    "recordId": "row-26",
+    "recordData": {
+      "id": "row-26",
+      "contratoObjeto": "022-A/CPL/2022 - CONNECTIONS - PREST. SERV. DE INTERNET",
+      "processo": "2026/009744",
+      "periodoValor": "02/12 a 01/01/2026 - R$ 51.949,97",
+      "setorData": "DESPESA - 31/03/2026"
+    },
+    "phoneNumber": "21981682922",
+    "sentAt": "2026-04-30T12:56:15.190Z",
+    "createdAt": "2026-04-30T12:56:15.195Z"
+  },
+  {
+    "recordId": "row-32",
+    "recordData": {
+      "id": "row-32",
+      "contratoObjeto": "004/CPL/2025 - INSTAR - FORNECIMENTO SOFTWARE DIÁRIO OFICIAL",
+      "processo": "2026/020240",
+      "periodoValor": "23/12 a 30/12/2025 - R$ 425,00",
+      "setorData": "DESPESA - 16/04/2026"
+    },
+    "phoneNumber": "21981682922",
+    "sentAt": "2026-04-30T12:56:15.199Z",
+    "createdAt": "2026-04-30T12:56:15.203Z"
+  },
+  {
+    "recordId": "row-29",
+    "recordData": {
+      "id": "row-29",
+      "contratoObjeto": "017-B/CPL/2025 - DS TEC - PREST. SERV. INFORMÁTICA",
+      "processo": "2026/011128",
+      "periodoValor": "01/12 a 30/12/2025 - R$ 499.850,53",
+      "setorData": "DESPESA - 27/03/2026"
+    },
+    "phoneNumber": "21981682922",
+    "sentAt": "2026-04-30T14:59:44.733Z",
+    "createdAt": "2026-04-30T14:59:44.762Z"
+  }
+]
