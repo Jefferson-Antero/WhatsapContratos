@@ -1,3 +1,7 @@
+// Portas customizáveis via variáveis de ambiente
+const BACKEND_PORT = process.env.BACKEND_PORT || 3001;
+const FRONTEND_PORT = process.env.FRONTEND_PORT || 3000;
+
 module.exports = {
   apps: [
     {
@@ -7,7 +11,7 @@ module.exports = {
       interpreter: 'tsx',
       env: {
         NODE_ENV: 'production',
-        PORT: 3001,
+        PORT: BACKEND_PORT,
       },
       // Configurações de reinicialização
       max_memory_restart: '500M',
@@ -17,7 +21,6 @@ module.exports = {
       // Reiniciar automaticamente em caso de erro
       max_restarts: 10,
       min_uptime: '10s',
-      // Variáveis de ambiente
       instances: 1,
       exec_mode: 'fork',
     },
@@ -28,7 +31,7 @@ module.exports = {
       cwd: './',
       env: {
         NODE_ENV: 'production',
-        PORT: 3000,
+        PORT: FRONTEND_PORT,
       },
       max_memory_restart: '300M',
       error_file: 'logs/frontend-error.log',
