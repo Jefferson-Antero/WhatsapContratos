@@ -1,18 +1,19 @@
-import * as xlsx from 'xlsx';
+import ExcelJS from 'exceljs';
 import { PaymentRecord } from '../types';
 
 export async function parseSpreadsheetFromBuffer(
   fileBuffer: ArrayBuffer
 ): Promise<PaymentRecord[]> {
   try {
-    const wb = xlsx.read(fileBuffer, { type: 'binary' });
-    const wsname = wb.SheetNames[0];
-    const ws = wb.Sheets[wsname];
-    const rawData = xlsx.utils.sheet_to_json(ws, {
-      header: 1,
-      raw: false,
-      blankrows: false,
-    }) as any[][];
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(fileBuffer);
+    const worksheet = workbook.worksheets[0];
+    
+    // Converter planilha em dados brutos
+    const rawData: any[][] = [];
+    worksheet.eachRow((row) => {
+      rawData.push(row.values as any[]);
+    });
 
     // Encontrar a linha de cabeçalho
     let headerRowIndex = -1;
