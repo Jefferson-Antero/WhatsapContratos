@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, CheckSquare, Square, Trash2, Eye, EyeOff, FileSpreadsheet, Share2 } from 'lucide-react';
+import { Send, CheckSquare, Square, Trash2, Eye, EyeOff, FileSpreadsheet, Share2, BookUser } from 'lucide-react';
 import { PaymentRecord } from '../types';
 import { cn } from '../lib/utils';
 import { fetchAndParseSpreadsheet } from '../lib/spreadsheetParser';
@@ -22,6 +22,22 @@ export default function PaymentPage({ records, setRecords }: PaymentPageProps) {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isSyncingPayments, setIsSyncingPayments] = useState(false);
   const navigate = useNavigate();
+
+  const contactsSupported = typeof (navigator as any).contacts !== 'undefined';
+
+  const pickContact = async () => {
+    try {
+      const contacts = await (navigator as any).contacts.select(['name', 'tel'], { multiple: false });
+      if (!contacts || contacts.length === 0) return;
+      const tel: string = contacts[0]?.tel?.[0] ?? '';
+      if (!tel) { alert('Contato sem número de telefone.'); return; }
+      // Remove tudo que não for dígito e descarta o +55 se vier
+      const digits = tel.replace(/\D/g, '').replace(/^55/, '');
+      setPhoneNumber(digits);
+    } catch {
+      alert('Não foi possível acessar os contatos.');
+    }
+  };
 
   // Carregar dados ao montar — telefone em sessionStorage (limpa ao fechar o browser)
   useEffect(() => {
@@ -471,16 +487,31 @@ export default function PaymentPage({ records, setRecords }: PaymentPageProps) {
                   placeholder="(11) 99999-9999"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all text-base"
+                  className={cn(
+                    "w-full pl-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all text-base",
+                    contactsSupported ? "pr-16" : "pr-10"
+                  )}
                 />
-                <button
-                  onClick={() => setShowPhone(!showPhone)}
-                  type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                  title={showPhone ? "Ocultar" : "Mostrar"}
-                >
-                  {showPhone ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                  {contactsSupported && (
+                    <button
+                      onClick={pickContact}
+                      type="button"
+                      className="text-gray-400 hover:text-green-600 transition-colors p-1"
+                      title="Selecionar da agenda"
+                    >
+                      <BookUser className="h-4 w-4" />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setShowPhone(!showPhone)}
+                    type="button"
+                    className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                    title={showPhone ? "Ocultar" : "Mostrar"}
+                  >
+                    {showPhone ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
 
               <label className="flex items-center gap-2 cursor-pointer text-xs sm:text-sm text-gray-700">
