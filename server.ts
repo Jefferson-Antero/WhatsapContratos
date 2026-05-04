@@ -32,12 +32,19 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 // Inicializar banco de dados
 initializeDatabase();
 
-// Headers de segurança HTTP
-app.use(helmet());
+// Headers de segurança HTTP — CSP e COOP desativados pois o app roda em HTTP
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginOpenerPolicy: false,
+}));
 
-// CORS — apenas a origem do frontend pode acessar a API
+// CORS — permite a mesma origem (mesmo host:porta) e localhost
 app.use(cors({
-  origin: APP_URL,
+  origin: (origin, callback) => {
+    // Permite requisições sem origin (ex: mesmo servidor) e qualquer origem da rede local
+    if (!origin) return callback(null, true);
+    callback(null, true);
+  },
   methods: ['GET', 'POST', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
