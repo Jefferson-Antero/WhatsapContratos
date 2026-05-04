@@ -322,6 +322,19 @@ app.post('/api/payments/reset', requireAuth, (req, res) => {
   }
 });
 
+// Reset completo: apaga arquivo, registros e histórico de envios
+app.post('/api/reset', requireAuth, (req, res) => {
+  try {
+    const filePath = path.join(UPLOADS_DIR, 'planilha.xlsx');
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    deleteAllPaymentRecords(); // também deleta payments_sent via CASCADE
+    res.json({ success: true, message: 'Sistema resetado com sucesso' });
+  } catch (error) {
+    console.error('Erro ao resetar:', error);
+    res.status(500).json({ error: 'Erro ao resetar sistema' });
+  }
+});
+
 // Serve frontend static files in production
 const distDir = path.join(__dirname, 'dist');
 if (fs.existsSync(distDir)) {

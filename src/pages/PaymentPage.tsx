@@ -205,13 +205,29 @@ export default function PaymentPage({ records, setRecords }: PaymentPageProps) {
     return val.replace(/\D/g, '');
   };
 
-  const clearData = () => {
+  const clearData = async () => {
+    try {
+      await fetch('/api/reset', { method: 'POST' });
+    } catch {
+      // segue mesmo se falhar
+    }
     setRecords([]);
     setSelectedIds(new Set());
     setSentIds(new Set());
     localStorage.removeItem('sent_payment_ids');
+    localStorage.removeItem('payment_records');
     navigate('/');
   };
+
+  // Quando todos os itens forem enviados, reseta automaticamente
+  useEffect(() => {
+    if (records.length > 0 && sentIds.size >= records.length) {
+      const timer = setTimeout(async () => {
+        await clearData();
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [sentIds.size, records.length]);
 
   const sendWhatsAppMsg = () => {
     if (selectedIds.size === 0) {
@@ -353,6 +369,12 @@ export default function PaymentPage({ records, setRecords }: PaymentPageProps) {
         </div>
       ) : !isLoading && records.length > 0 ? (
         <>
+          {sentIds.size >= records.length && records.length > 0 && (
+            <div className="bg-emerald-50 border-b border-emerald-200 px-4 py-3 flex items-center justify-center gap-2 text-emerald-800 text-sm font-medium">
+              <CheckSquare className="h-4 w-4 flex-shrink-0" />
+              Todos os itens foram enviados! Limpando automaticamente...
+            </div>
+          )}
           <div className="bg-gray-50 px-3 sm:px-5 py-3 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
             <div className="flex flex-wrap items-center gap-2">
               <span className="bg-white border border-gray-200 text-gray-700 text-xs sm:text-sm font-medium px-2 sm:px-2.5 py-1 rounded-md">
