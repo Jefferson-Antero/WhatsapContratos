@@ -23,10 +23,10 @@ export default function PaymentPage({ records, setRecords }: PaymentPageProps) {
   const [isSyncingPayments, setIsSyncingPayments] = useState(false);
   const navigate = useNavigate();
 
-  // Carregar dados do localStorage ao montar
+  // Carregar dados ao montar — telefone em sessionStorage (limpa ao fechar o browser)
   useEffect(() => {
-    const savedPhone = localStorage.getItem('whatsapp_phone') || '';
-    const savedSavePhone = localStorage.getItem('whatsapp_save_phone') === 'true';
+    const savedPhone = sessionStorage.getItem('whatsapp_phone') || '';
+    const savedSavePhone = sessionStorage.getItem('whatsapp_save_phone') === 'true';
     const savedSentIds = localStorage.getItem('sent_payment_ids');
 
     setPhoneNumber(savedPhone);
@@ -183,13 +183,13 @@ export default function PaymentPage({ records, setRecords }: PaymentPageProps) {
       return;
     }
 
-    // Salvar número se checkbox estiver marcado
+    // Salvar número em sessionStorage (dura apenas enquanto o browser estiver aberto)
     if (savePhone) {
-      localStorage.setItem('whatsapp_phone', phoneNumber);
-      localStorage.setItem('whatsapp_save_phone', 'true');
+      sessionStorage.setItem('whatsapp_phone', phoneNumber);
+      sessionStorage.setItem('whatsapp_save_phone', 'true');
     } else {
-      localStorage.removeItem('whatsapp_phone');
-      localStorage.removeItem('whatsapp_save_phone');
+      sessionStorage.removeItem('whatsapp_phone');
+      sessionStorage.removeItem('whatsapp_save_phone');
     }
 
     const selectedRecords = records.filter(r => selectedIds.has(r.id));
@@ -396,6 +396,7 @@ export default function PaymentPage({ records, setRecords }: PaymentPageProps) {
                   <th className="px-2 sm:px-4 py-3 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Processo</th>
                   <th className="hidden sm:table-cell px-2 sm:px-4 py-3 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Período</th>
                   <th className="px-2 sm:px-4 py-3 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Valor</th>
+                  <th className="px-2 sm:px-4 py-3 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                   <th className="hidden lg:table-cell px-2 sm:px-4 py-3 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Setor / Data</th>
                 </tr>
               </thead>
@@ -436,6 +437,19 @@ export default function PaymentPage({ records, setRecords }: PaymentPageProps) {
                       <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm truncate font-semibold text-blue-600">{record.processo}</td>
                       <td className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm truncate">{record.periodo || '-'}</td>
                       <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm truncate font-semibold text-green-600">{record.valor || '-'}</td>
+                      <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap">
+                        {isSent ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
+                            Enviado
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />
+                            Pendente
+                          </span>
+                        )}
+                      </td>
                       <td className="hidden lg:table-cell px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm truncate">{record.setorData}</td>
                     </tr>
                   );

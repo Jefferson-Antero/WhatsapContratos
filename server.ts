@@ -1,7 +1,10 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import helmet from 'helmet';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 import { parseSpreadsheetFromBuffer } from './src/lib/spreadsheetParser';
 import {
   initializeDatabase,
@@ -18,6 +21,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3001;
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
+const API_TOKEN = process.env.API_TOKEN;
+const APP_URL = process.env.APP_URL || `http://localhost:${PORT}`;
 
 // Criar pasta de uploads se não existir
 if (!fs.existsSync(UPLOADS_DIR)) {
@@ -27,15 +32,56 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 // Inicializar banco de dados
 initializeDatabase();
 
+// Headers de segurança HTTP
+app.use(helmet());
+
+// CORS — apenas a origem do frontend pode acessar a API
+app.use(cors({
+  origin: APP_URL,
+  methods: ['GET', 'POST', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+// Rate limiting global
+app.use(rateLimit({
+  windowMs: 60_000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Muitas requisições. Tente novamente em instantes.' },
+}));
+
+// Rate limiting restrito para upload
+const uploadLimiter = rateLimit({
+  windowMs: 60_000,
+  max: 10,
+  message: { error: 'Limite de uploads atingido. Aguarde 1 minuto.' },
+});
+
+// Autenticação por token (opcional — ativa apenas se API_TOKEN estiver definido no .env)
+function requireAuth(req: Request, res: Response, next: NextFunction) {
+  if (!API_TOKEN) return next();
+  const auth = req.headers['authorization'];
+  if (auth !== `Bearer ${API_TOKEN}`) {
+    return res.status(401).json({ error: 'Não autorizado' });
+  }
+  next();
+}
+
 app.use(express.json());
-app.use(express.raw({ type: 'application/octet-stream', limit: '50mb' }));
+app.use(express.raw({ type: 'application/octet-stream', limit: '10mb' }));
 
 // Endpoint para fazer upload do arquivo
-app.post('/api/upload', async (req, res) => {
+app.post('/api/upload', uploadLimiter, requireAuth, async (req, res) => {
   try {
     const buffer = req.body as Buffer;
     if (!buffer || buffer.length === 0) {
       return res.status(400).json({ error: 'Nenhum arquivo foi enviado' });
+    }
+
+    // Validar magic bytes: XLSX é um ZIP (50 4B 03 04)
+    if (buffer[0] !== 0x50 || buffer[1] !== 0x4B || buffer[2] !== 0x03 || buffer[3] !== 0x04) {
+      return res.status(400).json({ error: 'Formato de arquivo inválido. Envie um arquivo .xlsx válido.' });
     }
 
     const fileName = 'planilha.xlsx';
@@ -44,7 +90,9 @@ app.post('/api/upload', async (req, res) => {
     fs.writeFileSync(filePath, buffer);
 
     // Parsear e salvar no banco de dados
-    const records = await parseSpreadsheetFromBuffer(buffer.buffer);
+    // buffer.buffer pode ter byteOffset != 0 (Node.js Buffer compartilha pool interno)
+    const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+    const records = await parseSpreadsheetFromBuffer(arrayBuffer);
     
     // Limpar registros antigos e inserir novos
     deleteAllPaymentRecords();
@@ -73,7 +121,7 @@ app.post('/api/upload', async (req, res) => {
 });
 
 // Endpoint para verificar se existe arquivo
-app.get('/api/check-upload', (req, res) => {
+app.get('/api/check-upload', requireAuth, (req, res) => {
   try {
     const fileName = 'planilha.xlsx';
     const filePath = path.join(UPLOADS_DIR, fileName);
@@ -96,7 +144,7 @@ app.get('/api/check-upload', (req, res) => {
 });
 
 // Endpoint para deletar arquivo
-app.delete('/api/upload/:fileName', (req, res) => {
+app.delete('/api/upload/:fileName', requireAuth, (req, res) => {
   try {
     const { fileName } = req.params;
     const filePath = path.join(UPLOADS_DIR, fileName);
@@ -119,7 +167,7 @@ app.delete('/api/upload/:fileName', (req, res) => {
 });
 
 // Endpoint para obter o arquivo
-app.get('/api/upload/:fileName', (req, res) => {
+app.get('/api/upload/:fileName', requireAuth, (req, res) => {
   try {
     const { fileName } = req.params;
     const filePath = path.join(UPLOADS_DIR, fileName);
@@ -143,7 +191,7 @@ app.get('/api/upload/:fileName', (req, res) => {
 // ==================== ENDPOINTS DE REGISTROS ====================
 
 // Endpoint para obter todos os registros de pagamento
-app.get('/api/records', (req, res) => {
+app.get('/api/records', requireAuth, (req, res) => {
   try {
     const records = getAllPaymentRecords();
     const sentIds = getSentPaymentIds();
@@ -172,7 +220,7 @@ app.get('/api/records', (req, res) => {
 // ==================== ENDPOINTS DE PAGAMENTOS ====================
 
 // Registrar um pagamento como enviado
-app.post('/api/payments/sent', (req, res) => {
+app.post('/api/payments/sent', requireAuth, (req, res) => {
   try {
     const { recordId, recordData, phoneNumber, sentAt } = req.body;
 
@@ -196,7 +244,7 @@ app.post('/api/payments/sent', (req, res) => {
 });
 
 // Recuperar histórico de pagamentos enviados
-app.get('/api/payments/sent', (req, res) => {
+app.get('/api/payments/sent', requireAuth, (req, res) => {
   try {
     const history = getPaymentHistory();
     
@@ -212,7 +260,7 @@ app.get('/api/payments/sent', (req, res) => {
 });
 
 // Verificar se um pagamento específico foi enviado
-app.get('/api/payments/sent/:recordId', (req, res) => {
+app.get('/api/payments/sent/:recordId', requireAuth, (req, res) => {
   try {
     const { recordId } = req.params;
     const sentIds = getSentPaymentIds();
@@ -230,7 +278,7 @@ app.get('/api/payments/sent/:recordId', (req, res) => {
 });
 
 // Deletar um registro de pagamento
-app.delete('/api/payments/sent/:recordId', (req, res) => {
+app.delete('/api/payments/sent/:recordId', requireAuth, (req, res) => {
   try {
     const { recordId } = req.params;
     deletePaymentSent(recordId);
@@ -247,7 +295,7 @@ app.delete('/api/payments/sent/:recordId', (req, res) => {
 });
 
 // Limpar todos os registros de pagamentos (útil para reset)
-app.post('/api/payments/reset', (req, res) => {
+app.post('/api/payments/reset', requireAuth, (req, res) => {
   try {
     const sentIds = getSentPaymentIds();
     const count = sentIds.length;
