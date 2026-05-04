@@ -274,7 +274,7 @@ export default function PaymentPage({ records, setRecords }: PaymentPageProps) {
     }
   };
 
-  const shareSelectedRecords = async () => {
+  const shareSelectedRecords = () => {
     if (selectedIds.size === 0) {
       alert("Selecione pelo menos uma linha para compartilhar.");
       return;
@@ -284,50 +284,21 @@ export default function PaymentPage({ records, setRecords }: PaymentPageProps) {
 
     let text = `Olá, por favor providencie o pagamento dos seguintes contratos/processos:\n\n`;
     selectedRecords.forEach(r => {
-      if (r.processo !== '-') text += `PROCESSO: ${r.processo}\n`;
-      if (r.contratoObjeto !== '-') text += `CONTRATO / CREDOR / OBJETO: ${r.contratoObjeto}\n`;
-      if (r.valor !== '-') text += `VALOR: ${r.valor}\n`;
-      if (r.periodo !== '-') text += `PERÍODO: ${r.periodo}\n`;
-      text += `---\n`;
+      if (r.processo !== '-') text += `*PROCESSO:* ${r.processo}\n`;
+      if (r.contratoObjeto !== '-') text += `*CONTRATO / CREDOR / OBJETO:* ${r.contratoObjeto}\n`;
+      if (r.periodoValor !== '-') text += `*PERÍODO / VALOR:* ${r.periodoValor}\n`;
+      text += `--------------------------\n`;
     });
 
-    // Verificar se a Web Share API está disponível
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Solicitação de Pagamento',
-          text: text,
-        });
+    // Abre o WhatsApp sem número — o próprio app deixa escolher o contato
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
 
-        // Marcar os IDs como enviados
-        const newSentIds = new Set(sentIds);
-        selectedIds.forEach(id => newSentIds.add(id));
-        setSentIds(newSentIds);
-
-        // Desselecionar os IDs
-        setSelectedIds(new Set());
-
-        // Registrar pagamentos no backend
-        registerPaymentsToBackend(selectedRecords, '');
-      } catch (error) {
-        // Usuário cancelou o compartilhamento
-        console.log('Compartilhamento cancelado:', error);
-      }
-    } else {
-      // Fallback: copiar para clipboard
-      const copied = await copyToClipboard(text);
-      if (copied) {
-        alert('Conteúdo copiado! Cole em qualquer aplicativo para compartilhar.');
-
-        const newSentIds = new Set(sentIds);
-        selectedIds.forEach(id => newSentIds.add(id));
-        setSentIds(newSentIds);
-        setSelectedIds(new Set());
-        registerPaymentsToBackend(selectedRecords, '');
-      } else {
-        alert('Erro ao copiar o conteúdo. Tente usar o botão Compartilhar.');
-      }
-    }
+    const newSentIds = new Set(sentIds);
+    selectedIds.forEach(id => newSentIds.add(id));
+    setSentIds(newSentIds);
+    setSelectedIds(new Set());
+    registerPaymentsToBackend(selectedRecords, '');
   };
 
   return (
