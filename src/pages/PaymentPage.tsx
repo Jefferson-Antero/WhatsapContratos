@@ -25,6 +25,32 @@ export default function PaymentPage({ records, setRecords }: PaymentPageProps) {
 
   const contactsSupported = typeof (navigator as any).contacts !== 'undefined';
 
+  // Copia texto para clipboard com fallback para HTTP (sem HTTPS)
+  const copyToClipboard = async (text: string): Promise<boolean> => {
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        // cai no fallback abaixo
+      }
+    }
+    // Fallback via execCommand — funciona em HTTP
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.cssText = 'position:fixed;opacity:0;pointer-events:none;';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(textarea);
+      return ok;
+    } catch {
+      return false;
+    }
+  };
+
   const pickContact = async () => {
     try {
       const contacts = await (navigator as any).contacts.select(['name', 'tel'], { multiple: false });
@@ -288,24 +314,18 @@ export default function PaymentPage({ records, setRecords }: PaymentPageProps) {
         console.log('Compartilhamento cancelado:', error);
       }
     } else {
-      // Fallback: copiar para clipboard se Web Share API não estiver disponível
-      try {
-        await navigator.clipboard.writeText(text);
+      // Fallback: copiar para clipboard
+      const copied = await copyToClipboard(text);
+      if (copied) {
         alert('Conteúdo copiado! Cole em qualquer aplicativo para compartilhar.');
-        
-        // Marcar os IDs como enviados
+
         const newSentIds = new Set(sentIds);
         selectedIds.forEach(id => newSentIds.add(id));
         setSentIds(newSentIds);
-
-        // Desselecionar os IDs
         setSelectedIds(new Set());
-
-        // Registrar pagamentos no backend
         registerPaymentsToBackend(selectedRecords, '');
-      } catch (error) {
-        console.error('Erro ao copiar:', error);
-        alert('Erro ao copiar o conteúdo');
+      } else {
+        alert('Erro ao copiar o conteúdo. Tente usar o botão Compartilhar.');
       }
     }
   };
