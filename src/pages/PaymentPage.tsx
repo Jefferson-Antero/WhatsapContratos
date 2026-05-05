@@ -423,7 +423,7 @@ export default function PaymentPage({ records, setRecords }: PaymentPageProps) {
                   </th>
                   <th className="px-2 sm:px-4 py-3 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Contrato / Credor</th>
                   <th className="px-2 sm:px-4 py-3 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Processo</th>
-                  <th className="hidden sm:table-cell px-2 sm:px-4 py-3 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Período</th>
+                  <th className="px-2 sm:px-4 py-3 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Período</th>
                   <th className="px-2 sm:px-4 py-3 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Valor</th>
                   <th className="px-2 sm:px-4 py-3 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                   <th className="hidden lg:table-cell px-2 sm:px-4 py-3 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Setor / Data</th>
@@ -464,7 +464,7 @@ export default function PaymentPage({ records, setRecords }: PaymentPageProps) {
                       </td>
                       <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm truncate font-medium">{record.contratoObjeto}</td>
                       <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm truncate font-semibold text-blue-600">{record.processo}</td>
-                      <td className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm truncate">{record.periodo || '-'}</td>
+                      <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm truncate">{record.periodo || '-'}</td>
                       <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm truncate font-semibold text-green-600">{record.valor || '-'}</td>
                       <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap">
                         {isSent ? (
